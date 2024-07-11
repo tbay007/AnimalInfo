@@ -8,12 +8,33 @@
 <p role="status">Current count: @currentCount</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@if(_cats != null)
+{
+    @foreach (var cat in _cats)
+    {
+        <div class="row">
+            <div>@cat.Id</div>
+            <div>@cat.Title</div>
+        </div>
+
+    }
+}
+
 
 @code {
     private int currentCount = 0;
 
+    private HttpClient httpClient = new HttpClient();
+    private List<Models.Cat>? _cats;
+
     private void IncrementCount()
     {
         currentCount++;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        httpClient.BaseAddress = new Uri("http://localhost:5000");
+        _cats = await httpClient.GetFromJsonAsync<List<Models.Cat>?>("http://localhost:5000/GetAllCats");
     }
 }

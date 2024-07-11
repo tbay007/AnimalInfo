@@ -21,7 +21,11 @@ namespace AnimalInfo
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
+            builder.Services.AddScoped(sp =>
+                    new HttpClient
+                    {
+                        BaseAddress = new Uri("https://localhost:5000")
+                    });
             builder.Services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = IdentityConstants.ApplicationScheme;
