@@ -1,0 +1,115 @@
+﻿@page "/addcat"
+@rendermode InteractiveServer
+
+<PageTitle>Add A Cat</PageTitle>
+
+<h3>Add A Cat</h3>
+
+<EditForm Model="addCat" OnSubmit="Submit"  FormName="AddCat">
+	<div class="row">
+		<div class="col-xl-1 mt-2">
+			<label>ID for Animal: </label>
+		</div>
+		<div class="col-xl-5 mt-2">
+			<InputNumber @bind-Value="addCat!.Id"  />
+		</div>
+		<div class="col-xl-6 mt-2">
+			&nbsp;
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xl-1 mt-2">
+			<label>UID for Animal: </label>
+		</div>
+		<div class="col-xl-5 mt-2">
+			<InputText @bind-Value="addCat!.UID"></InputText>
+		</div>
+		<div class="col-xl-6 mt-2">
+			&nbsp;
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xl-1 mt-2">
+			<label>Breed of Animal: </label>
+		</div>
+		<div class="col-xl-5 mt-2">
+			<InputText @bind-Value="addCat!.Title" />
+		</div>
+		<div class="col-xl-6 mt-2">
+			&nbsp;
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xl-1 mt-2">
+			<label>Breed Description of Animal: </label>
+		</div>
+		<div class="col-xl-5 mt-2">
+			<InputText @bind-Value="addCat!.Description" />
+		</div>
+		<div class="col-xl-6 mt-2">
+			&nbsp;
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xl-1 mt-2">
+			<label>Image URL of Animal: </label>
+		</div>
+		<div class="col-xl-5 mt-2">
+			<InputText @bind-Value="addCat!.ImageUrl" />
+		</div>
+		<div class="col-xl-6 mt-2">
+			&nbsp;
+		</div>
+	</div>
+	<button type="submit">Save form</button>
+</EditForm>
+
+
+@code {
+
+	[SupplyParameterFromForm]
+	private Models.Cat? addCat { get; set; }
+	private HttpClient httpClient = new HttpClient();
+	private List<Models.Cat>? _cats { get; set; }
+	private int maxId { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		addCat = new Models.Cat();
+
+		httpClient.BaseAddress = new Uri("http://localhost:5000");
+		_cats = await httpClient.GetFromJsonAsync<List<Models.Cat>?>("http://localhost:5000/GetAllCats");
+		if (_cats != null)
+		{
+			maxId = _cats.Select((b, x) => b.Id).Max();
+			addCat!.Id = maxId + 1;
+		}
+
+	}
+
+	private async void Submit()
+	{
+		addCat!.AnimalId = addCat.Id;
+		if (httpClient == null)
+		{
+			httpClient!.BaseAddress = new Uri("http://localhost:5000");
+		}
+		await httpClient.PostAsJsonAsync("http://localhost:5000/SaveCat", addCat, CancellationToken.None);
+
+		addCat = new Models.Cat();
+		maxId = 0;
+		_cats = new List<Models.Cat>();
+		if (httpClient == null)
+		{
+			httpClient!.BaseAddress = new Uri("http://localhost:5000");
+		}
+		_cats = await httpClient.GetFromJsonAsync<List<Models.Cat>?>("http://localhost:5000/GetAllCats");
+		if (_cats != null)
+		{
+			maxId = _cats.Select((b, x) => b.Id).Max();
+			addCat!.Id = maxId + 1;
+		}
+
+		
+	}
+}
